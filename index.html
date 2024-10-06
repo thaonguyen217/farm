@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FARM: Functional Group-Aware Representations for Small Molecules</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333333;
+        }
+
+        header {
+            background:  rgba(37, 113, 128, 0.8);
+            /* background: url(./images/FG_av.png); */
+            color: #fff;
+            padding: 30px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+            letter-spacing: 1px;
+        }
+
+        .authors {
+            font-size: 1.2em;
+            margin: 20px 0;
+            font-weight: normal;
+        }
+
+        .superscript {
+            font-size: 0.8em;
+        }
+
+        nav {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        nav button {
+            padding: 10px 20px;
+            border: none;
+            background: #FD8B51; /* Coral */
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            transition: background 0.3s;
+            font-family: 'Open Sans', sans-serif; /* Montserrat font for all buttons */
+        }
+
+        nav button img {
+            width: 20px;
+            margin-right: 8px;
+        }
+
+        nav button:hover {
+            background: #96CEB4; /* Light teal */
+        }
+
+        section {
+            padding: 20px;
+            margin: 10px auto;
+            max-width: 800px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        section h2 {
+            border-bottom: 2px solid #257180; /* Teal */
+            padding-bottom: 10px;
+            color: #257180; /* Teal */
+        }
+
+        .figure {
+            width: 100%; /* Make the div take full width of its container */
+            max-width: 800px; /* Optional: Set a max width if needed */
+            margin: 0 auto; /* Center the figure within its container */
+            text-align: center; /* Center align the caption text */
+        }
+
+        .figure figcaption {
+            margin-bottom: 15px; /* Add space below the caption */
+            font-style: italic; /* Ensure the caption is italicized */
+        }
+
+        .figure img {
+            width: 100%; /* Make the image responsive */
+            height: auto; /* Maintain aspect ratio */
+        }
+
+        footer {
+            text-align: center; /* Center the text */
+            padding: 20px 0; /* Add padding to top and bottom */
+            font-size: 14px; /* Adjust font size */
+            color: #333; /* Dark gray text */
+            background-color: #f9f9f9; /* Light background color */
+            margin-top: 20px; /* Add space at the top of the footer */
+        }
+
+        footer p {
+            margin: 0; /* Remove default margin from the paragraph */
+        }
+
+        ul {
+        padding-left: 20px; /* Optional: Adds padding to the left for nested lists */
+        }
+
+        li {
+            margin-bottom: 10px; /* Adjust spacing between items */
+        }
+
+        strong {
+                font-weight: bold;
+            }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>FARM: Functional Group-Aware Representations for Small Molecules</h1>
+        <div class="authors">
+            Thao Nguyen<span class="superscript">¹</span>, Kuan-Hao Huang<span class="superscript">²</span>, 
+            Ge Liu<span class="superscript">¹</span>, Martin D. Burke<span class="superscript">¹</span>, 
+            Ying Diao<span class="superscript">¹</span>, Heng Ji<span class="superscript">¹</span>
+        </div>
+        <div>
+            <span class="superscript">¹</span> University of Illinois Urbana-Champaign<br>
+            <span class="superscript">²</span> Texas A&M University
+        </div>
+    </header>
+
+    <nav>
+        <button class="nav-button" onclick="window.open('https://arxiv.org/pdf/2410.02082', '_blank')">
+            <img src="./arxiv.png" alt="Paper">Paper
+        </button>
+        <button class="nav-button" onclick="window.open('https://github.com/your-github-repo', '_blank')">
+            <img src="./github.png" alt="GitHub">Code
+        </button>
+        <button class="nav-button" onclick="window.open('https://huggingface.co/your-model', '_blank')">
+            <img src="./huggingface.svg" alt="Hugging Face">Model
+        </button>
+    </nav>
+
+    <nav id="toc">
+        <ul>
+            <a href="#introduction">Introduction</a> |
+            <a href="#method">FARM model</a> |
+            <a href="#results">Results</a> |
+            <a href="#conclusion">Future work</a>
+        </ul>
+    </nav>
+    
+
+    <section id="introduction">
+        <h2>Introduction</h2>
+        <p>
+            The exploration of chemical compounds often hinges on understanding the unique roles that <i>functional groups</i> play in determining molecular properties and behaviors, as even a slight change in a functional group can lead to significant differences in properties. For example, while <i>aspirin</i> and <i>salicylic acid</i> are structurally similar, the only difference lies in the substitution of the hydroxyl group (OH) in salicylic acid with an ester (COO) in aspirin, transforming a skincare compound into an effective drug. However, traditional molecular representations, such as SMILES, treat atoms as isolated entities, lacking the nuanced insight provided by functional group interactions.
+        </p>
+        <p>
+            Based on this insight, we designed <strong>FARM</strong> (Functional Group-Aware Representations for Small Molecules). The key innovation of FARM lies in its <strong><i>functional group-aware tokenization</i></strong>, which incorporates functional group information directly into the representations. This strategic reduction in tokenization granularity, intentionally interfaced with key drivers of functional properties (i.e., functional groups), enhances the model's understanding of chemical language, expands the chemical lexicon, bridges the gap between SMILES and natural language, and ultimately advances the model's capacity to predict molecular properties.
+        </p>
+    </section>
+
+    <div class="figure">
+        <figcaption><i>Salicylic acid and aspirin share the same core structure but differ in a single functional group—where the hydroxyl group (-OH) in salicylic acid is replaced by an ester group (-COO-) in aspirin. This small change leads to significant differences in their chemical properties and biological activity.</i></figcaption>
+        <img src="./images/example.png">
+    </div>
+
+    <section id="method">
+        <h2>FARM model</h2>
+        <ul>
+            <li>
+                <strong>Functional Group (FG) Detection Algorithm:</strong> We present a rule-based FG detection algorithm capable of accurately identifying <i>101 traditional functional groups</i>, as well as <i>all ring and fused ring</i> systems.
+            </li>
+
+            <li>
+                <strong>FG-Aware Tokenization and Fragmentation:</strong> Utilizing our FG detection algorithm, we develop a FG-aware tokenization and fragmentation system that generates:
+                <ul>
+                    <li><strong><i>FG-Enhanced SMILES:</i></strong> A modified SMILES representation enriched with functional group information. For example, a ketone-containing group originally depicted in SMILES as <i>*C(=O)*</i> is transformed into an FG-enhanced SMILES string like <i>*C_ketone(=O_ketone)*</i>.</li>
+
+                    <li><strong><i>FG Graph:</i></strong> A graphical representation of the molecule highlighting its functional groups.</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Dual View of Molecular Representation:</strong> We adopt a dual approach to learning molecular representations—atom-level and structural view—aligning these representations to create a unified and robust framework effective for both levels:
+                <ul>
+                    <li><strong><i>Atom-Level Embedding:</i></strong> We employ masked language modeling (MLM) for effective self-supervised learning of atom-level embeddings using FG-enhanced SMILES as input.</li>
+                    
+                    <li><strong><i>Structural Representation Learning:</i></strong> This involves two steps:
+                        <ul>
+                            <li><i>FG Knowledge Graph:</i> We construct a comprehensive FG knowledge graph, with each FG encompasses various relations, such as containing atom type and bond type, core structures, solubility, etc. We then leverage the ComplEx model to learn embeddings for these functional groups.</li>
+                            
+                            <li><i>GCN-Based Structure Learning:</i> The FG knowledge graph embeddings serve as input for a Graph Convolutional Network (GCN) model, which predicts links between pairs of functional groups to learn the overall structure of the molecule (input: FG graph).</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </section>
+
+    
+    <figure class="figure">
+        <figcaption> (a) FARM’s molecular representation learning model architecture. (b) Functional group-aware tokenization and fragmentation algorithm. (c) Snapshot of the functional group knowledge graph. (d) Generation of negative samples for contrastive learning.</figcaption>
+        <img src="./images/main.png" alt="Main Figure">
+    </figure>
+
+    <section>
+        <p><strong><i>Negative transfer</i></strong> occurs when a model trained on one domain or task struggles to generalize effectively to another due to differences in the underlying patterns. In molecular modeling, using only individual atom tokens without functional group information can lead to poor learning because the model fails to capture the full context of molecular behavior. The small, simplistic vocabulary of atom types, typically around 100 tokens, limits the model’s ability to understand complex chemical properties, often resulting in incorrect generalizations or degraded performance across different molecules and tasks.</p>
+        <p>To address this, our FG-aware tokenization expands the vocabulary from 93 tokens to approximately <strong>14,741</strong> tokens by incorporating functional group information. While this significantly increases the complexity of the model, making training slower and harder to converge, it also prevents negative transfer by enabling the model to learn richer and more meaningful chemical semantics. This larger, more nuanced vocabulary allows the model to better capture the functional roles of atoms within molecules, improving its ability to generalize across tasks and ultimately leading to more accurate molecular representations.</p>
+    </section>
+    <figure class="figure">
+        <figcaption> Number of functional groups associated with different chemical elements in the FG-enhanced SMILES dataset. The y-axis represents the natural logarithm (log, base e) of the count.</figcaption>
+        <img src="./images/output.png" alt="Main Figure">
+    </figure>
+
+    <section id="results">
+        <h2>Results</h2>
+        <p> We rigorously evaluate FARM on the MoleculeNet dataset, where it achieves state-of-the-art performance on 10 out of 12 tasks. These results highlight FARM’s potential to improve molecular representation learning, with promising applications in drug discovery and pharmaceutical research. Below is an analysis of molecule embeddings generated by FARM:</p>
+        <p><strong>Masked language prediction model (BERT)</strong></p>
+        <p>We examine the attention mechanism of the BERT model trained with FG-enhanced SMILES by visualizing the attention scores for a query atom. The attention map reveals that the model pays more attention to atoms that are strongly connected to the query atom than to those that are merely adjacent in the SMILES string. In detail, the query atom at position 23 shows higher attention to the atom at position 0, which is part of the same ring, rather than to the atom at position 26, which is closer in the SMILES string but not directly connected. This demonstrates that the model effectively learns the syntax and semantics of SMILES, capturing the underlying molecular structure rather than merely relying on the linear sequence of SMILES.</p>
+    </section>
+
+    <div class="figure">
+        <figcaption>Visualization of the attention map of the BERT model trained with functional group-enhanced SMILES, demonstrating the model’s ability to learn and recognize the syntax of SMILES.</figcaption>
+        <img src="./images/attention.png" alt="Analysis Figure 1">
+    </div>
+
+    <section>
+        <p><strong>FG knowledge graph</strong></p>
+        <p>To assess the quality of the learned embeddings, we randomly sampled clusters of five closely related embedding vectors and analyzed their arrangement in the embedding space. The results demonstrate that similar FGs tend to cluster together, indicating that the FG knowledge graph embeddings effectively capture relationships between FGs.</p>
+    </section>
+    <div class="figure">
+        <figcaption>Visualization of functional group knowledge graph embedding space: Clusters of five functional groups with closely related embeddings</figcaption>
+        <img src="./images/cluster0.png" alt="Analysis Figure 1">
+    </div>
+
+    <section>
+        <p><strong>GCN link prediction model</strong> for molecular structure learning</p>
+        <p>Inspired by word pair analogy tasks in NLP, we replace one functional group in a molecule with another and observe consistent parallel results across different molecules in the molecular structure embedding space. This demonstrates the model’s ability to effectively capture and preserve chemical analogies, highlighting its robustness in learning and representing molecular structures.</p>
+    </section>
+    <div class="figure">
+        <figcaption> Similar to word embedding analogies in NLP, replacing one functional group in a molecule with another produces parallel results across different molecules, demonstrating the model’s ability to capture chemical relationships effectively.</figcaption>
+        <img src="./images/analogy.png" alt="Analysis Figure 2">
+    </div>
+
+    <section id="conclusion">
+        <h2>Limitations & Future work</h2>
+        <p>While FARM shows strong performance, there are two main limitations that should be addressed in future work. First, the current model does not incorporate a full 3D molecular representation, which is critical for capturing stereochemistry and spatial configurations that affect molecular properties. Incorporating 3D information Yan et al. (2024) could further enhance the model’s predictions. Second, the model faces challenges when dealing with rare fused ring systems due to out-of-vocabulary issues. A potential solution to this limitation is to extend the training dataset, covering a broader portion of chemical space to include more diverse and complex molecular structures.</p>
+        <p>Looking ahead, our ultimate goal is to develop a pre-trained atom embedding that parallels the capabilities of pre-trained word embeddings in NLP. This would enable a richer and more nuanced understanding of molecular properties and behaviors at the atomic level. Similarly, we aim to achieve molecule-level representations that are as expressive and versatile as sentence-level embeddings in NLP, capturing both local and global molecular features. By bridging the gap between atom-wise embeddings and holistic molecule representations, FARM paves the way for more accurate, generalizable molecular predictions across a variety of tasks.</p>
+    </section>
+
+    <section>
+        <h2>BibTeX</h2>
+        <pre>
+@article{your-paper-id,
+  title={FARM: Functional Group-Aware Representations for Small Molecules},
+  author={Thao Nguyen and Kuan-Hao Huang and Ge Liu and Martin D. Burke and Ying Diao and Heng Ji},
+  journal={Arxiv},
+  year={2024},
+  <!-- publisher={} -->
+}
+        </pre>
+    </section>
+
+    <footer>
+        <p>© 2024 Thao Nguyen</p>
+    </footer>
+</body>
+</html>
